@@ -2,6 +2,8 @@
 library(tidyr)
 library(dplyr)
 library(readxl)
+library(ggplot2)
+library(gridExtra)
 
 masterlist = read_excel("data/masterlist_open_closed.xlsx")
 public_school_list = read_excel("data/Masterlist of Public Schools.xlsx")
@@ -75,11 +77,87 @@ public_school_list$municipality = as.factor(public_school_list$municipality)
 public_school_list$`learner grouping` = as.factor(public_school_list$`learner grouping`)
 
 # merge using emis_no
+merged_masterlist = merge(public_school_list, masterlist, by='emis_no', all.x=T)
 
-# select relevent columns
+# select relevent columns for regression analysis
+# chosen_vars = c("emis_no", "circuit.x", "correspondence language.x", "sector.x",
+#                 "institution type.x" , "fee status.x" , "quintile.x", "magisterial district.x" ,
+#                 "lowest grade.x", "highest grade.x", "bus route learners", "feeding scheme learners",
+#                 "section21.x", "leased school", "plankie school", "connectivity")
+merged_masterlist_chosen = merged_masterlist %>% select(emis_no, school_name.x, `magisterial district.x`, circuit.x, `correspondence language.x`,
+                                                 sector.x, `institution type.x`, `total learner enrolled`,`hostel learners`,  `fee status.x`, quintile.x,
+                                                 `magisterial district.x`, `lowest grade.x`, `highest grade.x`,
+                                                 `bus route learners`, `feeding scheme learners`, section21.x,
+                                                 `leased school`, `plankie school`, connectivity, long.x, lat.x, status.x)
 
 # plot number of learners distribution
+hist(merged_masterlist_chosen$`total learner enrolled`, breaks=100, main = "Distribution of number of enrolled students", xlab = "number of students")
+
+# plotting function
+scatter_plot <- function(school_data, x, y, title, x_lab, y_lab){
+  scPlot = ggplot(school_data, aes(x=x, y=y)) +
+    geom_point() +
+    labs(title=title, x=x_lab, y=y_lab)
+      
+    # geom_text(label = merged_masterlist_chosen$`magisterial district.x`,
+    #           nudge_x = 0.25,
+    #           nudge_y = 0.25, 
+    #           check_overlap = T)
+  
+  return (scPlot)
+}
+
+# plot learners enrolled vs feeding scheme
+learner_v_feeding = scatter_plot(merged_masterlist_chosen,
+                                merged_masterlist_chosen$`feeding scheme learners`,
+                                merged_masterlist_chosen$`total learner enrolled`,
+                                'relationship between school enrollment and number of children on feeding scheme',
+                                'learners on feeding scheme',
+                                'total learners enrolled')
+learner_v_feeding
+
+# plot learners enrolled vs bus routes
+learner_v_bus = scatter_plot(merged_masterlist_chosen,
+                                merged_masterlist_chosen$`bus route learners`,
+                                merged_masterlist_chosen$`total learner enrolled`,
+                                'relationship between school enrollment and number of children that take bus transport',
+                                'learners on bus routes',
+                                'total learners enrolled')
+learner_v_bus
+
+# plot number learners vs hostel
+learners_v_hostel = scatter_plot(merged_masterlist_chosen,
+                                 merged_masterlist_chosen$`hostel learners`,
+                                 merged_masterlist_chosen$`total learner enrolled`,
+                                 'relationship between number of students enrolled and number in hostels',
+                                 'learners enrolled',
+                                 'learners in hostel')
+learners_v_hostel
+
+# plot feeding scheme vs bus routes
+feeding_v_bus = scatter_plot(merged_masterlist_chosen,
+                             merged_masterlist_chosen$`feeding scheme learners`,
+                             merged_masterlist_chosen$`bus route learners`,
+                             'relationship between number of students using bus transport and feediing scheme students',
+                             'feeding scheme learners',
+                             'bus route learners')
+learner_v_bus
 
 
+# plot hostel vs feeding scheme
+hostel_v_feeding = scatter_plot(merged_masterlist_chosen,
+                                 merged_masterlist_chosen$`hostel learners`,
+                                 merged_masterlist_chosen$`feeding scheme learners`,
+                                 'relationship between number of students in hostels and feeding scheme students',
+                                 'learners in hostel',
+                                 'feeding scheme learners')
+hostel_v_feeding
 
+# plot them all in a grid
+grid.arrange(learner_v_feeding,
+             learner_v_bus,
+             learners_v_hostel,
+             feeding_v_bus,
+             hostel_v_feeding,
+             nrow = 2)
 
