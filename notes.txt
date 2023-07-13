@@ -1,0 +1,26 @@
+--------------------------------------Bar Plots-----------------------------------------
+More quintile 5 schools compared to the rest
+
+This means more students in total are going to quintile 5 schools
+
+But the average class size for quintile 2, 3 and 4 is higher than quintile 5.
+
+More students go to quintile 5 schools in total but because there a lot of quintile 5 schools, children can be dispersed effectively to reduce large class sizes.
+Whereas, there may be less students going to quintile 2 and 3 schools but there are fewer quintile 2 and 3 schools so class sizes are large.
+
+If we are looking to build more schools then focus needs to be on quintile 2, 3 and 4 schools.
+
+Also seems to be more quintile 1 schools than is needed.
+-----------------------------------------------------------------------------------------
+
+------------------------------------Scatter Plots----------------------------------------
+FEEDING SCHEME
+quintile 1 schools have to cater to almost all students. As there are more students in the Q1 school the more students they have on a feeding scheme (direct relationship).
+Same with Q2 and Q3 but they don't follow this trend as strictly.
+
+If a Q1 and Q2 school is being built there must be significant focus on infrastructure to support a feeding scheme.
+
+Q4 and Q5 have no trend really. You can have large numbers of learners in a Q4 and Q5 school but have only a few learners on feeding schemes.
+
+
+
