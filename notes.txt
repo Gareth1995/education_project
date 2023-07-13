@@ -21,6 +21,19 @@ Same with Q2 and Q3 but they don't follow this trend as strictly.
 If a Q1 and Q2 school is being built there must be significant focus on infrastructure to support a feeding scheme.
 
 Q4 and Q5 have no trend really. You can have large numbers of learners in a Q4 and Q5 school but have only a few learners on feeding schemes.
+-------------------------------------------------------------------------------------------
 
+------------------------------------Linear Regression--------------------------------------
+Quintile level is one of the more significant variables that explain total enrollment numbers. From the bar graph we can see that the effect it exerts is that for NQ2, NQ3 and NQ4 you have more learners than in NQ1 and NQ5 schools. 
+
+Connectivity also has a positive impact on school enrollment numbers schools that have internet connection attract more students.
+
+We also see that schools with an English correspondence language have a positive effect on number of student enrollments 
+------------------------------------------------------------------------------------------
+
+---------------------------------Location based-------------------------------------------
+Metro east has an average school size of 1147 (larger than the other regions) yet it has predominently NQ5 schools (70). The average size of an NQ5 school is around 800+. Is Metro East packing more students into an NQ5 school? Perhaps this is an issue of transurbanisation as we see many students from surrounding neighbourhoods eager to attend an NQ5 school in metro east. This would mean building more NQ5 schools in Metro East as the curent ones may be over-burdend.
+
+Other schools look normal.
 
 

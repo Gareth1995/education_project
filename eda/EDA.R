@@ -64,6 +64,12 @@ new_names_public_sch = c('emis_no', 'education district', 'circuit', 'school_nam
                          'bb speed', 'designated site', 'current tech')
 colnames(public_school_list) = new_names_public_sch
 
+# convert na to NO for mobile school, plankie and connectivity
+public_school_list$`mobile school`[is.na(public_school_list$`mobile school`)] <- 'NO'
+public_school_list$`plankie school`[is.na(public_school_list$`plankie school`)] <- 'NO'
+public_school_list$connectivity[is.na(public_school_list$connectivity)] <- 'NO'
+public_school_list$`leased school`[is.na(public_school_list$`leased school`)] <- 'NO'
+
 # change variables to appropriate type
 public_school_list$circuit = as.factor(public_school_list$circuit)
 public_school_list$lolt = as.factor(public_school_list$lolt)
@@ -90,8 +96,14 @@ public_school_list$`learner grouping` = as.factor(public_school_list$`learner gr
 
 # converting nas to correct type
 public_school_list$`current tech`[public_school_list$`current tech` == 0] <- NA
+
 # convert unknown types to known types
 public_school_list$`focused learner grouping`[public_school_list$`focused learner grouping` == "≥150"] <- ">=150" 
+
+# convert na to 0 for bus route learners, feeding scheme and hostel learners
+public_school_list$`bus route learners`[is.na(public_school_list$`bus route learners`)] <- 0
+public_school_list$`feeding scheme learners`[is.na(public_school_list$`feeding scheme learners`)] <- 0
+public_school_list$`hostel learners`[is.na(public_school_list$`hostel learners`)] <- 0
 
 # save public school list
 write.csv(public_school_list, 'data/open_school_list.csv', row.names = FALSE)
@@ -105,6 +117,6 @@ merged_masterlist = merge(public_school_list, masterlist, by='emis_no', all.x=T)
 merged_masterlist = merged_masterlist %>% select(emis_no:`current tech`)
 
 write.csv(merged_masterlist, 'data/merged_masterlist.csv', row.names = F)
------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------
 
 

@@ -93,6 +93,7 @@ hostel_v_feeding
 #-----------------------------------------------------------------------------------------------
 #----------------------Bar plots----------------------------------------------------------------
 
+###### Based on quintiles ##############
 # total number of students per quintile 
 q_learner_total = merged_masterlist %>% 
   group_by(quintile.x) %>%
@@ -140,8 +141,34 @@ grid.arrange(num_q_plot,
              q_learner_mean_plot,
              nrow = 2)
 
+#### Based on location ####
+
+merged_masterlist$quintile.x = as.factor(merged_masterlist$quintile.x)
+
+# plot number of learners per education district
+merged_masterlist %>% 
+  group_by(education.district) %>%
+  summarise(mean_learners = mean(total.learner.enrolled, na.rm = T))
+
+# plot number of different quintiles per education district
+s = merged_masterlist %>% 
+  group_by(education.district, quintile.x) %>%
+  count()
+
+# plot number of learners per insitution type
+
+# plot number of different quintiles per institution type
 
 
+#### Misc ####
 
+# number learners in school according to correspondence language
+merged_masterlist %>% 
+  group_by(correspondence.language.x) %>%
+  summarise(total_learners = sum(total.learner.enrolled, na.rm = T))
 
+# number of learners in schools with internet
+merged_masterlist %>% 
+  group_by(connectivity) %>%
+  summarise(total_learners = sum(total.learner.enrolled, na.rm = T))
 
