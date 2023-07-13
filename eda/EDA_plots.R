@@ -156,9 +156,14 @@ s = merged_masterlist %>%
   count()
 
 # plot number of learners per insitution type
+merged_masterlist %>% 
+  group_by(institution.type.x) %>%
+  summarise(mean_learners = mean(total.learner.enrolled, na.rm = T))
 
 # plot number of different quintiles per institution type
-
+q = merged_masterlist %>% 
+  group_by(institution.type.x, quintile.x) %>%
+  count()
 
 #### Misc ####
 
@@ -171,4 +176,9 @@ merged_masterlist %>%
 merged_masterlist %>% 
   group_by(connectivity) %>%
   summarise(total_learners = sum(total.learner.enrolled, na.rm = T))
+
+# number of institution types, metro districts and quintile
+metro_institution_quintile_counts = merged_masterlist %>% 
+  group_by(institution.type.x, quintile.x, education.district) %>%
+  count()
 

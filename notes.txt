@@ -35,5 +35,15 @@ We also see that schools with an English correspondence language have a positive
 Metro east has an average school size of 1147 (larger than the other regions) yet it has predominently NQ5 schools (70). The average size of an NQ5 school is around 800+. Is Metro East packing more students into an NQ5 school? Perhaps this is an issue of transurbanisation as we see many students from surrounding neighbourhoods eager to attend an NQ5 school in metro east. This would mean building more NQ5 schools in Metro East as the curent ones may be over-burdend.
 
 Other schools look normal.
+-------------------------------------------------------------------------------------------
+
+------------------------------Institution Based--------------------------------------------
+Secondary schools show a similar problem faced in metro east. There are a lot of NQ5 secondary schools but the average school sizes for secondary NQ5 schools are higher than the overall average NQ5 capcity average (this may be driven by outliers though)
+But this could be an indicator that secondary schools are overburdened.
+
+
+
+-----------Other notes-----------
+in presentation make sure to note that these analyses aim to direct people in the right direction in terms of what to look for. After surveying the data output we then go and experiment to find out if secondary schools are actually overburdned or is NQ5 schools in Metro east overburdned. We can't just take the numbers as an absolute truth because there is always an outlier factor that pulls the results one way or another.
 
 
