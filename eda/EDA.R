@@ -48,7 +48,7 @@ masterlist$`date closed` = as.character(masterlist$`date closed`)
 masterlist[masterlist == "N"|masterlist == "N/A"|masterlist == "UNKNOWN"|masterlist == "."] <- NA
 
 # save masterlist
-write.csv(masterlist, 'data/masterlist.csv', row.names = FALSE)
+# write.csv(masterlist, 'data/masterlist.csv', row.names = FALSE)
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -106,7 +106,7 @@ public_school_list$`feeding scheme learners`[is.na(public_school_list$`feeding s
 public_school_list$`hostel learners`[is.na(public_school_list$`hostel learners`)] <- 0
 
 # save public school list
-write.csv(public_school_list, 'data/open_school_list.csv', row.names = FALSE)
+# write.csv(public_school_list, 'data/open_school_list.csv', row.names = FALSE)
 
 # ---------------------------------------------------------------------------------------------------
 
@@ -116,7 +116,10 @@ merged_masterlist = merge(public_school_list, masterlist, by='emis_no', all.x=T)
 # remove useless variables
 merged_masterlist = merged_masterlist %>% select(emis_no:`current tech`)
 
-write.csv(merged_masterlist, 'data/merged_masterlist.csv', row.names = F)
-# -----------------------------------------------------------------------------------------------------
+# write.csv(merged_masterlist, 'data/merged_masterlist.csv', row.names = F)
 
+major_schools_merged = merge(masterlist, public_school_list, by='emis_no', all.x=T)
+major_schools_merged = major_schools_merged %>% select(emis_no:`exam authority`)
+write.csv(major_schools_merged, 'data/major_merged_schoolist.csv', row.names = F)
+# -----------------------------------------------------------------------------------------------------
 

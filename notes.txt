@@ -44,6 +44,6 @@ But this could be an indicator that secondary schools are overburdened.
 
 
 -----------Other notes-----------
-in presentation make sure to note that these analyses aim to direct people in the right direction in terms of what to look for. After surveying the data output we then go and experiment to find out if secondary schools are actually overburdned or is NQ5 schools in Metro east overburdned. We can't just take the numbers as an absolute truth because there is always an outlier factor that pulls the results one way or another.
+in presentation make sure to note that these analyses aim to direct people in the right direction in terms of what to look for. After surveying the data output we then go and experiment to find out if secondary schools are actually overburdned or is Metro East schools actually having more learners than the average. We can't just take the numbers as an absolute truth because there is always an outlier factor that pulls the results one way or another.
 
 

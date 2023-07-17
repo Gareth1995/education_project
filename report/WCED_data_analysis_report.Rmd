@@ -1,0 +1,157 @@
+---
+title: "WCED Data Analysis"
+author: "Gareth Edwards"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r load_data, echo=FALSE, message=FALSE}
+# import packages and load data
+library(tidyr)
+library(dplyr)
+library(readxl)
+library(ggplot2)
+library(gridExtra)
+library(lubridate)
+library(broom)
+library(ggpubr)
+
+merged_masterlist = read.csv('../eda/data/merged_masterlist.csv')
+```
+
+# WCED School Data Analysis
+
+## Bar Plots
+```{r bar_plots}
+###### Based on quintiles ##############
+# total number of students per quintile 
+q_learner_total = merged_masterlist %>% 
+  group_by(quintile.x) %>%
+  summarise(total_learners = sum(total.learner.enrolled, na.rm = T))
+
+# mean number of students per quintile 
+q_learner_mean = merged_masterlist %>% 
+  group_by(quintile.x) %>%
+  summarise(mean_learners = mean(total.learner.enrolled, na.rm = T))
+
+# number of schools per quintile
+num_q =  merged_masterlist %>% 
+  group_by(quintile.x) %>%
+  summarise(n = n())
+
+# plot frequency of quintile and food schemes
+q_feeding = merged_masterlist %>% 
+  group_by(quintile.x) %>%
+  summarise(total_feeding = sum(feeding.scheme.learners, na.rm = T))
+
+# number of bus route learners per quintile
+q_bus = merged_masterlist %>% 
+  group_by(quintile.x) %>%
+  summarise(total_bus = sum(bus.route.learners, na.rm = T))
+
+# plot bar plots
+# plot of number of schools per quintile 
+num_q_plot = ggplot(num_q, aes(x=quintile.x, y=n)) +
+  geom_bar(stat = 'identity') +
+  labs(x = 'quintile', y = 'n', title = 'number of schools per quintile')
+
+# plot of total learners per quintile
+q_learner_total_plot = ggplot(q_learner_total, aes(x=quintile.x, y=total_learners)) +
+  geom_bar(stat='identity') +
+  labs(x = 'quintile', y = 'total learners', title = 'total learners per quintile')
+
+# plot of mean learners per quintile
+q_learner_mean_plot = ggplot(q_learner_mean, aes(x=quintile.x, y=mean_learners)) +
+  geom_bar(stat='identity') +
+  labs(x = 'quintile', y = 'mean learners', title = 'mean number of learners per quintile')
+
+# plot barplots in a grid
+grid.arrange(num_q_plot,
+             q_learner_total_plot,
+             q_learner_mean_plot,
+             nrow = 2)
+```
+
+The barplots show there are more quintile 5 schools compared to the rest. There are also more students, in total, going to NQ5 schools. However, we see average school sizes for NQ2, NQ3 and NQ4 are higher than average school sizes for NQ5.
+
+This shows that there are an abundance of NQ5 schools so learners can be more evenly dispersed, but there aren't as much NQ2, 3 and 4 schools so learners who have to attend these schools don't have as many options which lead to a potentially crowded school in these areas. This could imply that if schools are to be built then the WCED must focus on NQ2, 3 and 4 schools (especially NQ2 and NQ3 schools).
+
+On the other hand we see there are more NQ1 schools than NQ2 and NQ3 schools and average class sizes for NQ1 schools are very low compared to the other quintile levels. This suggests an over abundance of NQ1 schools. There could be less NQ1 schools and that funding can go into developing more NQ2 and 3 schools.
+
+## Scatter Plot
+```{r scatter_plots, echo=FALSE}
+learner_v_feeding = ggplot(merged_masterlist, aes(x=feeding.scheme.learners, y=total.learner.enrolled, color = quintile.x)) +
+  geom_point() +
+  scale_color_manual(values=c("black", "orange", "blue", "red", "purple", "green"))+
+  labs(x='number of learners on feeding scheme',
+       y='total learners enrolled',
+       title='relationship between school enrollment and number of children on feeding scheme',
+       fill = 'Quintile')
+
+learner_v_feeding
+
+```
+The scatter plot shows that quintile 1 schools have to cater to almost all students. As the number of students in a NQ1 school increases so does the number of students that need a feeding scheme increase (direct linear relationship). The same can be said for NQ2 and NQ3 schools, but they don't follow this trend as strictly.
+
+If a Q1 and Q2 school is being built there must be significant focus on infrastructure to support a feeding scheme. Perhaps one could suggest focusing on feeding schemes at NQ3 schools if we are suggesting more NQ3 schools need to be built.
+
+NQ4 and NQ5 show no real trend when it comes to total learners enrolled and number of learners on a feeding scheme. The plot shows that you can have large numbers of learners in a NQ4 and NQ5 school but have only a few learners on feeding schemes, if any at all.
+\newpage
+
+## Multiple Linear Regression Model
+```{r mlr, echo=FALSE}
+# select variables
+merged_subset = merged_masterlist %>% select(education.district, correspondence.language.x,
+                             institution.type.x, fee.status.x, quintile.x,
+                             magisterial.district.x, bus.route.learners,
+                             feeding.scheme.learners, mobile.school, connectivity, total.learner.enrolled)
+
+# get data into correct format
+merged_subset$education.district = as.factor(merged_subset$education.district)
+merged_subset$correspondence.language.x = as.factor(merged_subset$correspondence.language.x)
+merged_subset$institution.type.x = as.factor(merged_subset$institution.type.x)
+merged_subset$fee.status.x = as.factor(merged_subset$fee.status.x)
+merged_subset$quintile.x = as.factor(merged_subset$quintile.x)
+merged_subset$mobile.school = as.factor(merged_subset$mobile.school)
+merged_subset$connectivity = as.factor(merged_subset$connectivity)
+merged_subset$magisterial.district.x = as.factor(merged_subset$magisterial.district.x)
+
+# normalise data
+merged_subset$total.learner.enrolled = scale(merged_subset$total.learner.enrolled)
+merged_subset$bus.route.learners = scale(merged_subset$bus.route.learners)
+merged_subset$feeding.scheme.learners = scale(merged_subset$feeding.scheme.learners)
+
+# apply linear model
+lm_model = lm(total.learner.enrolled ~ ., data = merged_subset)
+summary(lm_model)
+```
+I applied a linear model to the data with total learners enrolled to a school as the target variable. The independent variables and their effects on the target variable are displayed in the summary above. The model shows that quintile level is one of the more significant variables that explain total enrollment numbers. From the bar graph seen  previously we can see that the effect it exerts is that for NQ2, NQ3 and NQ4 you have more learners than in NQ1 and NQ5 schools. 
+
+Institution type also has an effect on total learners enrolled. Secondary schools tend to have more learners than other school types, with school of skills and special schools having much fewer learners than others. 
+
+Connectivity also has a positive impact on school enrollment numbers. Schools that have internet connection attract more students.
+
+We also see that schools with an English correspondence language have a positive effect on number of student enrollments. 
+
+## Location Insights
+
+```{r location_insights}
+# plot number of learners per education district
+merged_masterlist %>% 
+  group_by(education.district) %>%
+  summarise(mean_learners = mean(total.learner.enrolled, na.rm = T))
+```
+
+
+```{r location_insights2, echo=FALSE}
+# plot mean number of learners per insitution type
+merged_masterlist %>% 
+  group_by(institution.type.x) %>%
+  summarise(mean_learners = mean(total.learner.enrolled, na.rm = T))
+
+```
+
+The output tables show that there are higher school sizes, on average, for the Metro East region. We also see that the average secondary school sizes are larger than the rest. Perhaps focus on Metro East for a school building project can be the start as it seems they have large numbers of students per school, on average. And a focus can be on Secondary schools as they also seem to be overburdened. 

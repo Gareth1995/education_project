@@ -15,20 +15,6 @@ hist(merged_masterlist$total.learner.enrolled, breaks=100, main = "Distribution 
 #-----------------------------------------------------------------------------------------------
 #----------------------Scatter plots----------------------------------------------------------------
 
-# plotting function
-scatter_plot <- function(school_data, x, y, title, x_lab, y_lab){
-  scPlot = ggplot(school_data, aes(x=x, y=y)) +
-    geom_point() +
-    labs(title=title, x=x_lab, y=y_lab)
-  
-  # geom_text(label = merged_masterlist$`magisterial district.x`,
-  #           nudge_x = 0.25,
-  #           nudge_y = 0.25, 
-  #           check_overlap = T)
-  
-  return (scPlot)
-}
-
 # plot learners enrolled vs feeding scheme
 learner_v_feeding = ggplot(merged_masterlist, aes(x=feeding.scheme.learners, y=total.learner.enrolled, color = quintile.x)) +
   geom_point() +
@@ -150,11 +136,6 @@ merged_masterlist %>%
   group_by(education.district) %>%
   summarise(mean_learners = mean(total.learner.enrolled, na.rm = T))
 
-# plot number of different quintiles per education district
-s = merged_masterlist %>% 
-  group_by(education.district, quintile.x) %>%
-  count()
-
 # plot number of learners per insitution type
 merged_masterlist %>% 
   group_by(institution.type.x) %>%
@@ -162,7 +143,7 @@ merged_masterlist %>%
 
 # plot number of different quintiles per institution type
 q = merged_masterlist %>% 
-  group_by(institution.type.x, quintile.x) %>%
+  group_by(institution.type.x, quintile.x, education.district) %>%
   count()
 
 #### Misc ####

@@ -34,8 +34,6 @@ merged_subset$feeding.scheme.learners = scale(merged_subset$feeding.scheme.learn
 lm_model = lm(total.learner.enrolled ~ ., data = merged_subset)
 summary(lm_model)
 
-plot(total.learner.enrolled ~ ., data = merged_subset)
-
 
 
 
