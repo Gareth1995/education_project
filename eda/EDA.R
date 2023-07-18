@@ -27,6 +27,12 @@ new_names_masterlist = c('education district', 'circuit', 'emis_no', 'school_nam
 colnames(masterlist) = new_names_masterlist
 masterlist = masterlist %>% select(emis_no, 2:53) # get emis_no as first column
 
+# correct factors for correspondence language (make sure all have same case) 
+masterlist$`correspondence language` = toupper(masterlist$`correspondence language`)
+
+# correct factors for school status
+masterlist$status[masterlist$status == 'Pending'] <- 'Pending Closure'
+
 # change variable types to appropriate type
 masterlist$circuit = as.factor(masterlist$circuit)
 masterlist$lolt = as.factor(masterlist$lolt)
@@ -48,7 +54,7 @@ masterlist$`date closed` = as.character(masterlist$`date closed`)
 masterlist[masterlist == "N"|masterlist == "N/A"|masterlist == "UNKNOWN"|masterlist == "."] <- NA
 
 # save masterlist
-# write.csv(masterlist, 'data/masterlist.csv', row.names = FALSE)
+write.csv(masterlist, 'data/masterlist.csv', row.names = FALSE)
 
 # ----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -69,6 +75,9 @@ public_school_list$`mobile school`[is.na(public_school_list$`mobile school`)] <-
 public_school_list$`plankie school`[is.na(public_school_list$`plankie school`)] <- 'NO'
 public_school_list$connectivity[is.na(public_school_list$connectivity)] <- 'NO'
 public_school_list$`leased school`[is.na(public_school_list$`leased school`)] <- 'NO'
+
+# correct factors for correspondence language (make sure all have same case) 
+public_school_list$`correspondence language` = toupper(public_school_list$`correspondence language`)
 
 # change variables to appropriate type
 public_school_list$circuit = as.factor(public_school_list$circuit)
@@ -106,7 +115,7 @@ public_school_list$`feeding scheme learners`[is.na(public_school_list$`feeding s
 public_school_list$`hostel learners`[is.na(public_school_list$`hostel learners`)] <- 0
 
 # save public school list
-# write.csv(public_school_list, 'data/open_school_list.csv', row.names = FALSE)
+write.csv(public_school_list, 'data/open_school_list.csv', row.names = FALSE)
 
 # ---------------------------------------------------------------------------------------------------
 
@@ -116,7 +125,7 @@ merged_masterlist = merge(public_school_list, masterlist, by='emis_no', all.x=T)
 # remove useless variables
 merged_masterlist = merged_masterlist %>% select(emis_no:`current tech`)
 
-# write.csv(merged_masterlist, 'data/merged_masterlist.csv', row.names = F)
+write.csv(merged_masterlist, 'data/merged_masterlist.csv', row.names = F)
 
 major_schools_merged = merge(masterlist, public_school_list, by='emis_no', all.x=T)
 major_schools_merged = major_schools_merged %>% select(emis_no:`exam authority`)

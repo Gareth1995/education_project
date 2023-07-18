@@ -18,8 +18,13 @@ library(gridExtra)
 library(lubridate)
 library(broom)
 library(ggpubr)
+library(caTools)
+library(e1071)
+library(caret)
+library(nnet)
 
 merged_masterlist = read.csv('../eda/data/merged_masterlist.csv')
+major_df = read.csv('../eda/data/major_merged_schoolist.csv')
 ```
 
 # WCED School Data Analysis
@@ -155,3 +160,159 @@ merged_masterlist %>%
 ```
 
 The output tables show that there are higher school sizes, on average, for the Metro East region. We also see that the average secondary school sizes are larger than the rest. Perhaps focus on Metro East for a school building project can be the start as it seems they have large numbers of students per school, on average. And a focus can be on Secondary schools as they also seem to be overburdened. 
+\newpage
+
+## Predicting School Closure
+
+### Support Vector Machine (SVM)
+```{r classification}
+
+# select variables
+major_df = major_df %>% select(correspondence.language.x, sector.x, status.x,
+                               institution.type.x, quintile.x, fee.status.x, magisterial.district.x)
+
+# factorise variables
+major_df$status.x = as.factor(major_df$status.x)
+major_df$correspondence.language.x = as.factor(major_df$correspondence.language.x)
+major_df$sector.x = as.factor(major_df$sector.x)
+major_df$institution.type.x = as.factor(major_df$institution.type.x)
+major_df$quintile.x = as.factor(major_df$quintile.x)
+major_df$fee.status.x = as.factor(major_df$fee.status.x)
+major_df$magisterial.district.x = as.factor(major_df$magisterial.district.x)
+
+# split data in training and test sets
+set.seed(123)
+split = sample.split(major_df$status.x, SplitRatio = 0.75)
+
+training_set = na.omit(subset(major_df, split == TRUE))
+test_set = na.omit(subset(major_df, split == FALSE))
+
+# fit svm
+classifier = svm(formula = status.x ~ .,
+                 data = training_set,
+                 type = 'C-classification',
+                 kernel = 'linear')
+
+
+# Predicting the Test set results
+y_pred = predict(classifier, newdata = test_set[-3])
+
+# building the confusion matrix
+confusionMatrix(test_set[,3], y_pred)
+
+```
+
+Using an SVM to classify rows according to school status (opened or closed), it shows that if we use the variables correspondence language, sector, institution type, quintile, fee status and magisterial district, we can predict a school closure with approximately 87% accuracy.
+
+### Multinomial Logistic Regression
+
+```{r multinomial, echo=FALSE}
+# Fit the model (quintile and institution type play biggest role in regression)
+training_set$status.x = relevel(training_set$status.x, ref = 'Open')
+training_set$institution.type.x = relevel(training_set$institution.type.x, ref='Preprimary School')
+training_set$fee.status.x = relevel(training_set$fee.status.x, ref = 'No Fee')
+training_set$correspondence.language.x = relevel(training_set$correspondence.language.x, ref = 'ENGLISH')
+training_set$sector.x = relevel(training_set$sector.x, ref = 'ECD')
+
+# fit multinomial with all variables
+multi_nomial_mod = multinom(status.x~., data = training_set)
+summary(multi_nomial_mod)
+
+```
+I applied a multinomial logistic regression model to the data to find out which explanatory variables carried the most significance in predicting a school closure or if a school would remain open. The results show that quintile level and institution type play the biggest role in predicting school closures.
+
+```{r quintile_closure_plot, echo = FALSE}
+
+# Fit multinomial with just quintile
+multi_nom_q = multinom(status.x~quintile.x, data = training_set)
+
+# get probabilities of school closure given quintile
+q_probs = predict(multi_nom_q, type='prob', newdata = test_set)
+q_prob_df = cbind(test_set, q_probs)
+
+# df for bar graph of quintile and closure probability
+prob_spec_df = q_prob_df %>%
+  pivot_longer(cols = c(Open, Closed), names_to="status", values_to="prob") %>%
+  select(quintile.x, status, prob) %>%
+  unique()
+
+# plot chart of probabilities of school closure given an NQ score
+ggplot(prob_spec_df, aes(y=prob, x=quintile.x, fill=status)) +
+  geom_bar(position = 'stack', stat = 'identity') +
+  labs(x = 'quintile', title = 'probability of school closure given per quintile')
+
+ggplot(prob_spec_df, aes(y=prob, x=quintile.x, fill=status)) +
+  geom_bar(position = 'dodge', stat = 'identity') +
+  labs(x = 'quintile', title = 'probability of school closure given per quintile')
+
+prob_spec_df
+
+```
+The multinomial logistic regression model shows that NQ2 schools are almost 70% likely to close down. That is only based on this dataset though. We don't know what history looks like. But, based on the previous graphs showing NQ2 schools are experiencing higher average school sizes compared to NQ1 and NQ5 it could emphasize a need to build more NQ2 schools.
+
+```{r institution_closure_plot}
+# Fit multinomial with just institution type
+multi_nom_inst = multinom(status.x~institution.type.x, data = training_set)
+summary(multi_nom_inst)
+
+inst_preds = predict(multi_nom_inst, type='class', newdata = test_set)
+confusionMatrix(test_set[,3], inst_preds)
+
+# get probabilities of school closure given quintile
+inst_probs = predict(multi_nom_inst, type='prob', newdata = test_set)
+inst_prob_df = cbind(test_set, inst_probs)
+
+# df for bar graph of institution type and closure probability
+prob_spec_df_inst = inst_prob_df %>%
+  pivot_longer(cols = c(Open, Closed), names_to="status", values_to="prob") %>%
+  select(institution.type.x, status, prob) %>%
+  unique()
+
+# plot chart of probabilities of school closure given a institution type
+ggplot(prob_spec_df_inst, aes(y=prob, x=institution.type.x, fill=status)) +
+  geom_bar(position = 'stack', stat = 'identity') +
+  labs(x = 'institution type', title = 'probability of school closure given per institution type') +
+  theme(axis.text.x = element_text(angle = 90))
+
+ggplot(prob_spec_df_inst, aes(y=prob, x=institution.type.x, fill=status)) +
+  geom_bar(position = 'dodge', stat = 'identity') +
+  labs(x = 'institution type', title = 'probability of school closure given per institution type') +
+  theme(axis.text.x = element_text(angle = 90))
+
+prob_spec_df_inst
+
+
+```
+Here it shows that Preprimary school is more likely to be closed down with a probability of 63%. Another factor that could be worth mentioning that perhaps focus needs to be placed on Preprimary schools. Again, this is only based on this dataset. Historical data could alter the story.
+
+The graphs below show number of closures per quintile and number of closures per institution type compared to number of schools that have remained open.
+
+```{r closures_per_quintile}
+# plot multi bar graph of closures per quintile level
+closure_per_quintile = major_df %>%
+  group_by(quintile.x, status.x) %>%
+  count() %>%
+  na.omit() %>%
+  filter(status.x != 'Pending Closure')
+
+ggplot(closure_per_quintile, aes(y=n, x=quintile.x, fill=status.x)) +
+  geom_bar(position = 'dodge', stat = 'identity') +
+  labs(x = 'quintile', y = 'number of closures', title = 'number of school closures per quintile')
+```
+
+```{r closures_per_inst}
+# plot multibar graph of closures per institution type
+closure_per_inst = major_df %>%
+  group_by(institution.type.x, status.x) %>%
+  count() %>%
+  na.omit() %>%
+  filter(status.x != 'Pending Closure')
+
+ggplot(closure_per_inst, aes(y=n, x=institution.type.x, fill=status.x)) +
+  geom_bar(position = 'stack', stat = 'identity') +
+  labs(x = 'Institution type', y = 'Number of closures', title = 'Number of school closures per institution type') +
+  theme(axis.text.x = element_text(angle = 90))
+
+```
+
+
