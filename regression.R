@@ -39,5 +39,3 @@ summary(lm_model)
 
 
 
-
-

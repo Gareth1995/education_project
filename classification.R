@@ -11,8 +11,8 @@ major_df = read.csv('data/major_merged_schoolist.csv')
 
 # select variables
 major_df = major_df %>% select(correspondence.language.x, sector.x, status.x,
-                               institution.type.x, quintile.x, fee.status.x)#,
-                               #magisterial.district.x)
+                               institution.type.x, quintile.x, fee.status.x,
+                               magisterial.district.x)
 
 # factorise variables
 major_df$status.x = as.factor(major_df$status.x)
@@ -21,7 +21,7 @@ major_df$sector.x = as.factor(major_df$sector.x)
 major_df$institution.type.x = as.factor(major_df$institution.type.x)
 major_df$quintile.x = as.factor(major_df$quintile.x)
 major_df$fee.status.x = as.factor(major_df$fee.status.x)
-# major_df$magisterial.district.x = as.factor(major_df$magisterial.district.x)
+major_df$magisterial.district.x = as.factor(major_df$magisterial.district.x)
 
 # split data in training and test sets
 set.seed(123)
@@ -103,9 +103,6 @@ inst_prob_df = cbind(test_set, inst_probs)
 
 
 
-
-
-
 # df for bar graph of institution type and closure probability
 prob_spec_df_inst = inst_prob_df %>%
   pivot_longer(cols = c(Open, Closed), names_to="status", values_to="prob") %>%
@@ -147,5 +144,41 @@ ggplot(closure_per_inst, aes(y=n, x=institution.type.x, fill=status.x)) +
   geom_bar(position = 'stack', stat = 'identity') +
   labs(x = 'Institution type', y = 'Number of closures', title = 'Number of school closures per institution type') +
   theme(axis.text.x = element_text(angle = 90))
+
+#------------------------------Life Span classification----------------------------------
+
+# select variables
+lifespan_df = major_df %>% select(correspondence.language.x, sector.x, life_bin,
+                               institution.type.x, quintile.x, fee.status.x,
+                               magisterial.district.x)
+
+# factorise variables
+lifespan_df$life_bin = as.factor(lifespan_df$life_bin)
+lifespan_df$correspondence.language.x = as.factor(lifespan_df$correspondence.language.x)
+lifespan_df$sector.x = as.factor(lifespan_df$sector.x)
+lifespan_df$institution.type.x = as.factor(lifespan_df$institution.type.x)
+lifespan_df$quintile.x = as.factor(lifespan_df$quintile.x)
+lifespan_df$fee.status.x = as.factor(lifespan_df$fee.status.x)
+lifespan_df$magisterial.district.x = as.factor(lifespan_df$magisterial.district.x)
+
+# split data in training and test sets
+set.seed(123)
+split = sample.split(lifespan_df$life_bin, SplitRatio = 0.75)
+
+training_set = na.omit(subset(lifespan_df, split == TRUE))
+test_set = na.omit(subset(lifespan_df, split == FALSE))
+
+# fit svm
+classifier = svm(formula = life_bin ~ .,
+                 data = training_set,
+                 type = 'C-classification',
+                 kernel = 'linear')
+
+
+# Predicting the Test set results
+y_pred = predict(classifier, newdata = test_set[-3])
+
+# building the confusion matrix
+confusionMatrix(test_set[,3], y_pred)
 
 
