@@ -53,6 +53,18 @@ masterlist$`date closed` = as.character(masterlist$`date closed`)
 # convert na's to correct value type
 masterlist[masterlist == "N"|masterlist == "N/A"|masterlist == "UNKNOWN"|masterlist == "."] <- NA
 
+# add school lifespan variable to dataset
+masterlist$`date open` = as.Date(masterlist$`date open`)
+masterlist$`date closed` = as.Date(masterlist$`date closed`)
+
+masterlist['life_span'] = as.numeric(masterlist$`date closed` - masterlist$`date open`)
+
+# create categorical variable for lifespan bins
+masterlist['life_bin'] = NA
+masterlist$life_bin[masterlist$life_span<=730] = 'short'
+masterlist$life_bin[masterlist$life_span>=3474] = 'long'
+masterlist$life_bin[masterlist$life_span>730 & masterlist$life_span<3474] = 'normal'
+
 # save masterlist
 write.csv(masterlist, 'data/masterlist.csv', row.names = FALSE)
 
@@ -128,7 +140,7 @@ merged_masterlist = merged_masterlist %>% select(emis_no:`current tech`)
 write.csv(merged_masterlist, 'data/merged_masterlist.csv', row.names = F)
 
 major_schools_merged = merge(masterlist, public_school_list, by='emis_no', all.x=T)
-major_schools_merged = major_schools_merged %>% select(emis_no:`exam authority`)
+major_schools_merged = major_schools_merged %>% select(emis_no:`education district`)
 write.csv(major_schools_merged, 'data/major_merged_schoolist.csv', row.names = F)
 # -----------------------------------------------------------------------------------------------------
 
